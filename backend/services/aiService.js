@@ -13,6 +13,20 @@ const model = genAI.getGenerativeModel({
      IMPORTANT:
     - Never put app.js or server.js inside a "src/" or nested folder.
     - Keep app.js and server.js at the ROOT level alongside package.json and .env.
+    - ALWAYS include a "scripts" section in package.json with a "start" script: "start": "node app.js" (or whatever the main file is).
+    - ALWAYS include necessary imports/require statements at the top of EVERY file. For example, in app.js, you MUST have \`const express = require('express');\`.
+    - For MERN or Full Stack applications (Frontend + Backend):
+        - Create a root \`package.json\`, a backend \`app.js\` (or \`server.js\`), and a \`frontend\` folder for the React app.
+        - The ROOT \`package.json\` MUST include:
+            - "dependencies": { "concurrently": "^8.0.0", ... }
+            - "scripts": {
+                "start": "concurrently \"npm run server\" \"npm run client\"",
+                "server": "node app.js",
+                "client": "cd frontend && npm run dev",
+                "install-client": "cd frontend && npm install",
+                "postinstall": "npm run install-client"
+            }
+        - This ensures that when the user runs "Run" (which executes \`npm install\` and \`npm start\`), both backend and frontend dependencies are installed and both servers start.
 
     Examples: 
 
@@ -41,37 +55,28 @@ const model = genAI.getGenerativeModel({
                 "
             
         },
-    },
-
         "package.json": {
             file: {
                 contents: "
-
                 {
-                    "name": "temp-server",
-                    "version": "1.0.0",
-                    "main": "index.js",
-                    "scripts": {
-                        "test": "echo \"Error: no test specified\" && exit 1"
+                    \"name\": \"temp-server\",
+                    \"version\": \"1.0.0\",
+                    \"main\": \"app.js\",
+                    \"scripts\": {
+                        \"start\": \"node app.js\",
+                        \"test\": \"echo \\\"Error: no test specified\\\" && exit 1\"
                     },
-                    "keywords": [],
-                    "author": "",
-                    "license": "ISC",
-                    "description": "",
-                    "dependencies": {
-                        "express": "^4.21.2"
+                    \"keywords\": [],
+                    \"author\": \"\",
+                    \"license\": \"ISC\",
+                    \"description\": \"\",
+                    \"dependencies\": {
+                        \"express\": \"^4.21.2\"
                     }
-}
-
-                
+                }
                 "
-                
-                
-
             },
-
         },
-
     },
     "buildCommand": {
         mainItem: "npm",
@@ -84,24 +89,41 @@ const model = genAI.getGenerativeModel({
     }
 }
 
-    user:Create an express application 
-   
+    <example>
+    response: {
+    "text": "Here is the structure",
+    "fileTree": {
+        "src": {
+            "directory": {
+                "components": {
+                    "directory": {
+                        "Button.js": {
+                            "file": {
+                                "contents": "..."
+                            }
+                        }
+                    }
+                },
+                "App.js": {
+                    "file": {
+                        "contents": "..."
+                    }
+                }
+            }
+        },
+        "package.json": {
+            "file": {
+                "contents": "..."
+            }
+        }
+    }
+}
     </example>
-
-
     
-       <example>
-
-       user:Hello 
-       response:{
-       "text":"Hello, How can I help you today?"
-       }
-       
-       </example>
-    
- IMPORTANT : don't use file name like routes/index.js
-       
-       
+    IMPORTANT: 
+    - Use the "directory" key to represent folders.
+    - Ensure all file contents are strings.
+    - Follow the JSON structure strictly.
     `
 });
 

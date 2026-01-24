@@ -1,22 +1,43 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-*{
-  margin : 0%;
-  padding : 0%;
-  box-sizing : border-box;
+* {
+  margin: 0%;
+  padding: 0%;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
 }
 
-html, body {
+html,
+body {
   width: 100%;
   height: 100%;
+  background-color: #000000;
+  color: white;
 }
 
 .message-box::-webkit-scrollbar {
-    display: none;
+  display: none;
 }
 
-.message-box{
+.message-box {
   scroll-behavior: smooth;
+}
+
+.glass {
+  background: rgba(24, 24, 27, 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.glow-pink {
+  box-shadow: 0 0 20px rgba(219, 39, 119, 0.3);
+}
+
+.bg-glow {
+  background: radial-gradient(circle at 50% -20%, #500724 0%, #000000 70%);
 }

@@ -56,16 +56,28 @@ io.on('connection', socket => {
     socket.broadcast.to(socket.roomId).emit('project-message', data);
 
     if (aiIsPresentInMessage) {
-      const prompt = message.replace('@ai', '').trim();
-      const aiResponse = await generateResponse(prompt);
-      // console.log(aiResponse);
-      io.emit('project-message', {
-        message: aiResponse,
-        sender: {
-          _id: 'ai',
-          email: 'AI'
-        }
-      });
+      try {
+        const prompt = message.replace('@ai', '').trim();
+        const aiResponse = await generateResponse(prompt);
+        // console.log(aiResponse);
+        io.emit('project-message', {
+          message: aiResponse,
+          sender: {
+            _id: 'ai',
+            email: 'AI'
+          }
+        });
+      } catch (error) {
+        console.error("AI Service Error:", error);
+        io.emit('project-message', {
+          message: "AI Request Failed: Quota exceeded or service unavailable. Please try again later.",
+          sender: {
+            _id: 'ai',
+            email: 'AI'
+          },
+          isError: true
+        });
+      }
 
       return;
     }

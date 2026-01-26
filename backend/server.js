@@ -47,7 +47,6 @@ io.use(async (socket, next) => {
 });
 
 io.on('connection', socket => {
-  console.log(socket);
   socket.roomId = socket.project._id.toString()
   console.log('A user connected:');
 

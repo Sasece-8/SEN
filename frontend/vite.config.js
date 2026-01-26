@@ -8,13 +8,6 @@ export default defineConfig({
     "headers":{
       "Cross-Origin-Embedder-Policy": "require-corp",
       "Cross-Origin-Opener-Policy": "same-origin"
-    },
-    "proxy":{
-      "/cdn":{
-        target: "https://cdn.jsdelivr.net",
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/cdn/, '')
-      }
     }
   }
 })

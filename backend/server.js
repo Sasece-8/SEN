@@ -27,6 +27,10 @@ io.use(async (socket, next) => {
 
     socket.project = await projectModel.findById(projectId);
 
+    if (!socket.project) {
+      return next(new Error('Project not found')); 
+    }
+
     if (!token) {
       return next(new Error('Authentication error'));
     }
@@ -43,6 +47,7 @@ io.use(async (socket, next) => {
 });
 
 io.on('connection', socket => {
+  console.log(socket);
   socket.roomId = socket.project._id.toString()
   console.log('A user connected:');
 

@@ -14,11 +14,12 @@ const model = genAI.getGenerativeModel({
     - Never put app.js or server.js inside a "src/" or nested folder.
     - Keep app.js and server.js at the ROOT level alongside package.json and .env.
     - ALWAYS include a "scripts" section in package.json with a "start" script: "start": "node app.js" (or whatever the main file is).
+    - If you are generating a React/Vite application, ensure "scripts" includes: "dev": "vite", "build": "vite build", "preview": "vite preview".
     - ALWAYS include necessary imports/require statements at the top of EVERY file. For example, in app.js, you MUST have \`const express = require('express');\`.
     - For MERN or Full Stack applications (Frontend + Backend):
         - Create a root \`package.json\`, a backend \`app.js\` (or \`server.js\`), and a \`frontend\` folder for the React app.
         - The ROOT \`package.json\` MUST include:
-            - "dependencies": { "concurrently": "^8.0.0", ... }
+            - "dependencies": { "concurrently": "^8.0.0", "cors": "^2.8.5", "express": "^4.19.2", "nodemon": "^3.1.0" }
             - "scripts": {
                 "start": "concurrently \"npm run server\" \"npm run client\"",
                 "server": "node app.js",
@@ -27,6 +28,14 @@ const model = genAI.getGenerativeModel({
                 "postinstall": "npm run install-client"
             }
         - This ensures that when the user runs "Run" (which executes \`npm install\` and \`npm start\`), both backend and frontend dependencies are installed and both servers start.
+    
+    - CRITICAL RULES FOR GENERATION:
+        - **NO DATABASES**: DO NOT use MongoDB, MySQL, PostgreSQL, or any external database. Use an **IN-MEMORY ARRAY** (e.g., \`let tasks = []\`) in the backend to store data. The application must work without any external services.
+        - **EXPLICIT REACT IMPORT**: ALWAYS import React in every JSX file: \`import React from 'react';\`. Do not rely on automatic JSX runtime.
+        - **SELF-CONTAINED CODE**: DO NOT import valid-sounding middlewares (like \`asyncHandler\`, \`errorHandler\`, \`authMiddleware\`) unless you explicitly create those files in the fileTree. If you use a middleware, you MUST generate the code for it.
+        - **FRONTEND STRUCTURE**: For Vite/React, \`index.html\` MUST be in the root of the \`frontend\` folder, NOT in \`public\` or \`src\`.
+        - **NO PLACEHOLDERS**: Do not verify functionality with "..." or "// code here". Write the full working code.
+        - **DEPENDENCIES**: All imported modules (e.g., \`cors\`, \`express\`) MUST be listed in \`package.json\` dependencies. DO NOT miss this.
 
     Examples: 
 

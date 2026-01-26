@@ -406,6 +406,7 @@ const Project = () => {
                         <div className="actions flex gap-2 py-2">
                             <button
                                 onClick={async () => {
+                                    if (!webContainer) return;
                                     setIsRunning(true);
                                     setIframeUrl(null); // Reset iframe URL
                                     await webContainer.mount(fileTree)
@@ -451,15 +452,17 @@ const Project = () => {
 
                                     // Server-ready listener is now handled in the useEffect hook to prevent duplicates
                                 }}
-                                disabled={isRunning}
-                                className={`flex items-center gap-2 px-6 py-1.5 text-white font-bold rounded-lg transition-all active:scale-95 ${isRunning ? 'bg-brand-zinc-700 cursor-not-allowed' : 'bg-brand-pink hover:bg-brand-pink/90 glow-pink'}`}
+                                disabled={isRunning || !webContainer}
+                                className={`flex items-center gap-2 px-6 py-1.5 text-white font-bold rounded-lg transition-all active:scale-95 ${(isRunning || !webContainer) ? 'bg-brand-zinc-700 cursor-not-allowed' : 'bg-brand-pink hover:bg-brand-pink/90 glow-pink'}`}
                             >
                                 {isRunning ? (
                                     <i className="ri-loader-4-line animate-spin text-lg"></i>
+                                ) : !webContainer ? (
+                                    <i className="ri-loader-2-line animate-spin text-lg"></i>
                                 ) : (
                                     <i className="ri-play-fill text-lg"></i>
                                 )}
-                                {isRunning ? 'Running...' : 'Run'}
+                                {isRunning ? 'Running...' : !webContainer ? 'Booting...' : 'Run'}
                             </button>
                         </div>
                     </div>

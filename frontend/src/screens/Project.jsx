@@ -29,6 +29,7 @@ const Project = () => {
     const [IframeUrl, setIframeUrl] = useState(null);
     const [runProcess, setRunProcess] = useState(null);
     const [isRunning, setIsRunning] = useState(false);
+    const [isPreviewFullScreen, setIsPreviewFullScreen] = useState(false);
 
 
     function SyntaxHighlightedCode(props) {
@@ -141,6 +142,18 @@ const Project = () => {
             getWebContainer().then(container => {
                 setwebContainer(container);
                 console.log("container started");
+                setwebContainer(container);
+                console.log("container started");
+
+                // Add server-ready listener once when container starts
+                container.on("server-ready", (port, url) => {
+                    console.log(`Server ready at port ${port}: ${url}`);
+                    // Only automatically display the frontend (Vite default port or common React ports)
+                    if (port === 5173 || port === 3000 || port === 8080) {
+                        setIframeUrl(url);
+                        setIsRunning(false); // Stop the spinner when frontend is ready
+                    }
+                });
             });
         }
 
@@ -174,6 +187,7 @@ const Project = () => {
                 if (parsedMessage && parsedMessage.fileTree) {
                     setFileTree(parsedMessage.fileTree);
                     await webContainer?.mount(parsedMessage.fileTree);
+                    saveFileTree(parsedMessage.fileTree); // Save the new file tree to the backend immediately
                 }
             } catch (err) {
                 console.log("Could not parse fileTree from message:", err.message);
@@ -316,7 +330,7 @@ const Project = () => {
             </section>
 
             <section className='right flex-grow h-full flex overflow-hidden'>
-                <div className="explorer h-full bg-brand-zinc-950 border-r border-white/5 min-w-[200px] max-w-[300px] flex flex-col">
+                <div className={`explorer h-full bg-brand-zinc-950 border-r border-white/5 min-w-[200px] max-w-[300px] flex flex-col ${isPreviewFullScreen ? 'hidden' : ''}`}>
                     <header className="p-4 border-b border-white/5 flex items-center justify-between">
                         <h2 className="text-xs uppercase tracking-widest font-bold text-brand-zinc-500">Explorer</h2>
                     </header>
@@ -365,7 +379,7 @@ const Project = () => {
                     </div>
                 </div>
 
-                <div className="code-editor flex flex-col flex-grow h-full bg-brand-zinc-900/50">
+                <div className={`code-editor flex flex-col flex-grow h-full bg-brand-zinc-900/50 ${isPreviewFullScreen ? 'hidden' : ''}`}>
                     <div className="top flex justify-between items-center bg-brand-zinc-950/80 border-b border-white/5 pr-4">
                         <div className="files flex overflow-auto scrollbar-hide">
                             {openFiles.map((file, index) => (
@@ -412,7 +426,22 @@ const Project = () => {
 
                                     if (runProcess) runProcess.kill();
 
-                                    let tempRunProcess = await webContainer.spawn("npm", ["start"]);
+                                    // Determine the start command
+                                    let startCommand = ["start"];
+                                    try {
+                                        const packageJsonContent = fileTree['package.json']?.file?.contents || '{}';
+                                        const packageJson = JSON.parse(packageJsonContent);
+                                        console.log("Parsed package.json:", packageJson); // DEBUG LOG
+                                        if (packageJson.scripts && packageJson.scripts.dev) {
+                                            startCommand = ["run", "dev"];
+                                        }
+                                    } catch (e) {
+                                        console.warn("Failed to parse package.json for start command", e);
+                                    }
+
+                                    console.log("Selected Start Command:", startCommand); // DEBUG LOG
+
+                                    let tempRunProcess = await webContainer.spawn("npm", startCommand);
 
                                     tempRunProcess.output.pipeTo(new WritableStream({
                                         write(chunk) { console.log(chunk); }
@@ -420,11 +449,7 @@ const Project = () => {
 
                                     setRunProcess(tempRunProcess);
 
-                                    webContainer.on("server-ready", (port, url) => {
-                                        console.log(`Server ready at port ${port}: ${url}`);
-                                        setIframeUrl(url);
-                                        setIsRunning(false);
-                                    })
+                                    // Server-ready listener is now handled in the useEffect hook to prevent duplicates
                                 }}
                                 disabled={isRunning}
                                 className={`flex items-center gap-2 px-6 py-1.5 text-white font-bold rounded-lg transition-all active:scale-95 ${isRunning ? 'bg-brand-zinc-700 cursor-not-allowed' : 'bg-brand-pink hover:bg-brand-pink/90 glow-pink'}`}
@@ -503,7 +528,7 @@ const Project = () => {
                 </div>
 
                 {IframeUrl && webContainer && (
-                    <div className="flex min-w-[400px] flex-col h-full bg-brand-zinc-950 border-l border-white/10 glass">
+                    <div className="flex min-w-[400px] flex-grow flex-col h-full bg-brand-zinc-950 border-l border-white/10 glass">
                         <header className="p-3 border-b border-white/5 flex items-center gap-3">
                             <div className="flex gap-1.5">
                                 <div className="w-2.5 h-2.5 rounded-full bg-red-500/50"></div>
@@ -518,10 +543,16 @@ const Project = () => {
                                     className="w-full px-4 py-1.5 bg-brand-zinc-900 border border-brand-zinc-800 rounded-full text-xs text-brand-zinc-400 outline-none focus:border-brand-pink/30 transition-all font-mono"
                                 />
                             </div>
+                            <button onClick={() => setIsPreviewFullScreen(!isPreviewFullScreen)} className="p-1 hover:bg-white/5 rounded text-brand-zinc-500 transition-colors">
+                                <i className={isPreviewFullScreen ? "ri-fullscreen-exit-fill" : "ri-fullscreen-fill"}></i>
+                            </button>
                             <button onClick={() => window.open(IframeUrl, '_blank')} className="p-1 hover:bg-white/5 rounded text-brand-zinc-500 transition-colors">
                                 <i className="ri-external-link-fill"></i>
                             </button>
-                            <button onClick={() => setIframeUrl(null)} className="p-1 hover:bg-white/5 rounded text-brand-zinc-500 transition-colors">
+                            <button onClick={() => {
+                                setIframeUrl(null);
+                                setIsPreviewFullScreen(false);
+                            }} className="p-1 hover:bg-white/5 rounded text-brand-zinc-500 transition-colors">
                                 <i className="ri-close-fill"></i>
                             </button>
                         </header>
